@@ -89,7 +89,7 @@ if [[ "$1" == "doAction" && "$2" != "" ]]; then
  echo " Using LMDATE: $DATETIME"
  else
  echo " Moving to ./noexif/"
- mkdir -p "${MOVETO}noexif" && mv -f "$2" "${MOVETO}noexif"
+ mkdir -p "${MOVETO}noexif" && mv -b -f "$2" "${MOVETO}noexif"
  exit
  fi;
  else
@@ -125,7 +125,7 @@ if [[ "$1" == "doAction" && "$2" != "" ]]; then
  # sed issue for y command fix provided by thomas
  DIRNAME=`echo $EDATE | sed y-:-/-`
  echo -n " Moving to ${MOVETO}${DIRNAME}${MVCMD} ... "
- mkdir -p "${MOVETO}${DIRNAME}" && mv -f "$2" "${MOVETO}${DIRNAME}${MVCMD}"
+ mkdir -p "${MOVETO}${DIRNAME}" && mv -b -f "$2" "${MOVETO}${DIRNAME}${MVCMD}"
  echo "done."
  echo ""
  exit
