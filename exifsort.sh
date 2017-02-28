@@ -1,12 +1,5 @@
 #!/bin/bash
 #
-###############################################################################
-# Photo sorting program by Mike Beach
-# For usage and instructions, and to leave feedback, see
-# http://mikebeach.org/?p=4729
-#
-# Last update: 20-May-2013
-###############################################################################
 #
 # The following are the only settings you should need to change:
 #
