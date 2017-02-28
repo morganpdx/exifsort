@@ -4,8 +4,6 @@
 # The following are the only settings you should need to change:
 #
 # TS_AS_FILENAME: This can help eliminate duplicate images during sorting.
-# WARNING: Any two files with the same filename are automatically overwritten when
-# this is on. FIXME: Handle filename collisions.
 # TRUE: File will be renamed to the Unix timestamp and its extension.
 # FALSE (any non-TRUE value): Filename is unchanged.
 TS_AS_FILENAME=TRUE
@@ -13,9 +11,6 @@ TS_AS_FILENAME=TRUE
 # USE_LMDATE: If this is TRUE, images without EXIF data will have their Last Modified file
 # timestamp used as a fallback. If FALSE, images without EXIF data are put in noexif/ for
 # manual sorting.
-# WARNING: Filename collisions are NOT handled when this is off. Files are automatically
-# overwritten.
-# FIXME: Handle collisions when this is off.
 # Valid options are "TRUE" or anything else (assumes FALSE). FIXME: Restrict to TRUE/FALSE
 #
 USE_LMDATE=TRUE
