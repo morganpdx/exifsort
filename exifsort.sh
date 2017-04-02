@@ -92,11 +92,11 @@ if [[ "$1" == "doAction" && "$2" != "" ]]; then
  # Evaluate the file extension
  if [ "$USE_FILE_EXT" == "TRUE" ]; then
  # Get the FILE type and lowercase it for use as the extension
- EXT=`file -b $2 | awk -F' ' '{print $1}' | tr '[:upper:]' '[:lower:]'`
+ EXT=`file -b "$2" | awk -F' ' '{print $1}' | tr '[:upper:]' '[:lower:]'`
  if [[ "${EXT}" == "jpeg" && "${JPEG_TO_JPG}" == "TRUE" ]]; then EXT="jpg"; fi;
  else
  # Lowercase and use the current extension as-is
- EXT=`echo $2 | awk -F. '{print $NF}' | tr '[:upper:]' '[:lower:]'`
+ EXT=`echo "$2" | awk -F. '{print $NF}' | tr '[:upper:]' '[:lower:]'`
  fi;
  # Evaluate the file name
  if [ "$TS_AS_FILENAME" == "TRUE" ]; then
