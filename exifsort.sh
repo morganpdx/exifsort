@@ -6,14 +6,14 @@
 # TS_AS_FILENAME: This can help eliminate duplicate images during sorting.
 # TRUE: File will be renamed to the Unix timestamp and its extension.
 # FALSE (any non-TRUE value): Filename is unchanged.
-TS_AS_FILENAME=TRUE
+TS_AS_FILENAME=FALSE
 #
 # USE_LMDATE: If this is TRUE, images without EXIF data will have their Last Modified file
 # timestamp used as a fallback. If FALSE, images without EXIF data are put in noexif/ for
 # manual sorting.
 # Valid options are "TRUE" or anything else (assumes FALSE). FIXME: Restrict to TRUE/FALSE
 #
-USE_LMDATE=TRUE
+USE_LMDATE=FALSE
 #
 # USE_FILE_EXT: The following option is here as a compatibility option as well as a bugfix.
 # If this is set to TRUE, files are identified using FILE's magic, and the extension
@@ -22,7 +22,7 @@ USE_LMDATE=TRUE
 # See the manual page for file(1) to understand how this works.
 # NOTE: This option is only honored if TS_AS_FILENAME is TRUE.
 #
-USE_FILE_EXT=TRUE
+USE_FILE_EXT=FALSE
 #
 # JPEG_TO_JPG: The following option is here for personal preference. If TRUE, this will
 # cause .jpg to be used instead of .jpeg as the file extension. If FALSE (or any other
@@ -37,14 +37,14 @@ JPEG_TO_JPG=FALSE
 # Extensions are matched case-insensitive. *.jpg is treated the same as *.JPG, etc.
 # Can handle any file type; not just EXIF-enabled file types. See USE_LMDATE above.
 #
-FILETYPES=("*.jpg" "*.jpeg" "*.png" "*.tif" "*.tiff" "*.gif" "*.xcf")
+FILETYPES=("*.jpg" "*.jpeg" "*.png" "*.tif" "*.tiff" "*.gif" "*.xcf" "*.mov")
 #
 # Optional: Prefix of new top-level directory to move sorted photos to.
 # if you use MOVETO, it MUST have a trailing slash! Can be a relative pathspec, but an
 # absolute pathspec is recommended.
 # FIXME: Gracefully handle unavailable destinations, non-trailing slash, etc.
 #
-MOVETO=""
+MOVETO="/Volumes/photo/All Photos/"
 #
 ###############################################################################
 # End of settings. If you feel the need to modify anything below here, please share
@@ -64,60 +64,67 @@ MOVETO=""
 # sorting. Minor output issue when run in this manner. Related to find -print0 below.
 #
 # Are we supposed to run an action? If not, skip this entire section.
-if [[ "$1" == "doAction" && "$2" != "" ]]; then
- # Check for EXIF and process it
- echo -n ": Checking EXIF... "
- DATETIME=`identify -verbose "$2" | grep "exif:DateTime:" | awk -F' ' '{print $2" "$3}'`
- if [[ "$DATETIME" == "" ]]; then
- echo "not found."
- if [[ $USE_LMDATE == "TRUE" ]]; then
- # I am deliberately not using %Y here because of the desire to display the date/time
- # to the user, though I could avoid a lot of post-processing by using it.
- DATETIME=`stat --printf='%y' "$2" | awk -F. '{print $1}' | sed y/-/:/`
- echo " Using LMDATE: $DATETIME"
- else
- echo " Moving to ./noexif/"
- mkdir -p "${MOVETO}noexif" && mv -b -f "$2" "${MOVETO}noexif"
- exit
- fi;
- else
- echo "found: $DATETIME"
- fi;
- # The previous iteration of this script had a major bug which involved handling the
- # renaming of the file when using TS_AS_FILENAME. The following sections have been
- # rewritten to handle the action correctly as well as fix previously mangled filenames.
- # FIXME: Collisions are not handled.
- #
- EDATE=`echo $DATETIME | awk -F' ' '{print $1}'`
- # Evaluate the file extension
- if [ "$USE_FILE_EXT" == "TRUE" ]; then
- # Get the FILE type and lowercase it for use as the extension
- EXT=`file -b "$2" | awk -F' ' '{print $1}' | tr '[:upper:]' '[:lower:]'`
- if [[ "${EXT}" == "jpeg" && "${JPEG_TO_JPG}" == "TRUE" ]]; then EXT="jpg"; fi;
- else
- # Lowercase and use the current extension as-is
- EXT=`echo "$2" | awk -F. '{print $NF}' | tr '[:upper:]' '[:lower:]'`
- fi;
- # Evaluate the file name
- if [ "$TS_AS_FILENAME" == "TRUE" ]; then
- # Get date and times from EXIF stamp
- ETIME=`echo $DATETIME | awk -F' ' '{print $2}'`
- # Unix Formatted DATE and TIME - For feeding to date()
- UFDATE=`echo $EDATE | sed y/:/-/`
- # Unix DateSTAMP
- UDSTAMP=`date -d "$UFDATE $ETIME" +%s`
- echo " Will rename to $UDSTAMP.$EXT"
- MVCMD="/$UDSTAMP.$EXT"
- fi;
- # DIRectory NAME for the file move
- # sed issue for y command fix provided by thomas
- DIRNAME=`echo $EDATE | sed y-:-/-`
- echo -n " Moving to ${MOVETO}${DIRNAME}${MVCMD} ... "
- mkdir -p "${MOVETO}${DIRNAME}" && mv -b -f "$2" "${MOVETO}${DIRNAME}${MVCMD}"
- echo "done."
- echo ""
- exit
-fi;
+function processFile () {
+	MOVETO="/Volumes/photo/All Photos/"
+	if [[ "$1" == "doAction" && "$2" != "" ]]; then
+	 # Check for EXIF and process it
+	 echo -n ": Checking EXIF for $2: "
+	 DATETIME=`identify -verbose "$2" | grep "exif:DateTime:" | awk -F' ' '{print $2" "$3}'`
+	 if [[ "$DATETIME" == "" ]]; then
+	 echo "not found."
+	 if [[ $USE_LMDATE == "TRUE" ]]; then
+	 # I am deliberately not using %Y here because of the desire to display the date/time
+	 # to the user, though I could avoid a lot of post-processing by using it.
+	 DATETIME=`stat --printf='%y' "$2" | awk -F. '{print $1}' | sed y/-/:/`
+	 echo " Using LMDATE: $DATETIME"
+	 else
+	 echo " Moving to ./noexif/"
+	 mkdir -p "${MOVETO}noexif" && mv -f "$2" "${MOVETO}noexif"
+	 exit
+	 fi;
+	 else
+	 echo "found: $DATETIME"
+	 fi;
+	 # The previous iteration of this script had a major bug which involved handling the
+	 # renaming of the file when using TS_AS_FILENAME. The following sections have been
+	 # rewritten to handle the action correctly as well as fix previously mangled filenames.
+	 # FIXME: Collisions are not handled.
+	 #
+	 EDATE=`echo $DATETIME | awk -F' ' '{print $1}'`
+	 # Evaluate the file extension
+	 if [ "$USE_FILE_EXT" == "TRUE" ]; then
+	 # Get the FILE type and lowercase it for use as the extension
+	 EXT=`file -b "$2" | awk -F' ' '{print $1}' | tr '[:upper:]' '[:lower:]'`
+	 if [[ "${EXT}" == "jpeg" && "${JPEG_TO_JPG}" == "TRUE" ]]; then EXT="jpg"; fi;
+	 else
+	 # Lowercase and use the current extension as-is
+	 EXT=`echo "$2" | awk -F. '{print $NF}' | tr '[:upper:]' '[:lower:]'`
+	 fi;
+	 # Evaluate the file name
+	 if [ "$TS_AS_FILENAME" == "TRUE" ]; then
+	 # Get date and times from EXIF stamp
+	 ETIME=`echo $DATETIME | awk -F' ' '{print $2}'`
+	 # Unix Formatted DATE and TIME - For feeding to date()
+	 UFDATE=`echo $EDATE | sed y/:/-/`
+	 # Unix DateSTAMP
+	 UDSTAMP=`date -d "$UFDATE $ETIME" +%s`
+	 echo " Will rename to $UDSTAMP.$EXT"
+	 MVCMD="/$UDSTAMP.$EXT"
+	 fi;
+	 # DIRectory NAME for the file move
+	 # sed issue for y command fix provided by thomas
+	 DIRNAME=`echo $EDATE | sed y-:-/-`
+	 echo -n " Moving to ${MOVETO}${DIRNAME}${MVCMD} ... "
+	 mkdir -p "${MOVETO}${DIRNAME}" && mv -f "$2" "${MOVETO}${DIRNAME}${MVCMD}"
+	 echo "done."
+	 echo ""
+	 exit
+	fi;
+}
+
+function testing () {
+	"Testing $1 with $2"
+}
 #
 ###############################################################################
 # Scanning (find) loop
@@ -138,13 +145,14 @@ for x in "${FILETYPES[@]}"; do
  echo "Scanning for $x..."
  # FIXME: Eliminate problems with unusual characters in filenames.
  # Currently the exec call will fail and they will be skipped.
- find . -iname "$x" -print0 -exec sh -c "$0 doAction '{}'" \;
+ export -f processFile
+ find . -type d -name "All Photos" -prune -o -iname "$x" -exec bash -c 'processFile doAction "$0"' {} \;
  echo "... end of $x"
 done;
 # clean up empty directories. Find can do this easily.
 # Remove Thumbs.db first because of thumbnail caching
 echo -n "Removing Thumbs.db files ... "
-find . -name Thumbs.db -delete
+find . -iname Thumbs.db -delete
 echo "done."
 echo -n "Cleaning up empty directories ... "
 find . -empty -delete
