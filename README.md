@@ -1,5 +1,8 @@
 # exifsort
 
+Update of the exifsort script written by wb243 optimized for bash on Mac OSX, with a couple of tweaks of my own.
+
+
 The following script was written in bash on Ubuntu Linux and automatically sorts your images into directories based on the date and time the photo was taken. How does it do this? By making use of the EXIF data your digital camera stores inside the image. The date and time the photo was taken is stored in that EXIF data. When an image doesn't have EXIF data (such as when it was downloaded from the Internet, or taken from a camera that doesn't support adding EXIF data), it will use the files last-modified time.
 
 First, this should be run in the top-most directory of wherever your pictures are stored. If you have pictures/foldername/somepics/ and pictures/anotherfolder/morepics, run it from your pictures/ directory.
