@@ -63,7 +63,7 @@ MOVETO="/Volumes/photo/All Photos/"
 # This is NOT expected to be run by the user in this matter, but can be for single image
 # sorting. Minor output issue when run in this manner. Related to find -print0 below.
 #
-# Are we supposed to run an action? If not, skip this entire section.
+#https://www.askdavetaylor.com/can-i-analyze-exif-information-on-the-mac-os-x-command-line/
 function processFile () {
 	MOVETO="/Volumes/photo/All Photos/"
 	if [[ "$1" == "doAction" && "$2" != "" ]]; then
