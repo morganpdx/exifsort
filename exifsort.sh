@@ -146,7 +146,10 @@ for x in "${FILETYPES[@]}"; do
  # FIXME: Eliminate problems with unusual characters in filenames.
  # Currently the exec call will fail and they will be skipped.
  export -f processFile
- find . -type d -name "All Photos" -prune -o -iname "$x" -exec bash -c 'processFile doAction "$0"' {} \;
+
+-type d \( -name media -o -name images -o -name backups \)
+
+ find . -type d \( -name $MOVETO -o -name noexif -o -name recycle \) -prune -o -iname "$x" -exec bash -c 'testing doAction "$0"' {} \;
  echo "... end of $x"
 done;
 # clean up empty directories. Find can do this easily.
